@@ -14,7 +14,7 @@ public class VectorizationOptionsReader {
     protected static String VECTOR_LIMIT = "vector-limit";
     protected static String CONCEPT_MULTIPLIER = "concept-multiplier";
 
-    public Options addOptions(Options options) {
+    public void addOptions(Options options) {
         //WikiOptions
         Option option = new Option(null, WINDOW_SIZE, true, "");
         option.setRequired(false);
@@ -31,11 +31,9 @@ public class VectorizationOptionsReader {
         option = new Option(null, CONCEPT_MULTIPLIER, true, "");
         option.setRequired(false);
         options.addOption(option);
-
-        return options;
     }
 
-    public VectorizationOptions getVectorizationOptions(CommandLine cli) {
+    public VectorizationOptions getOptions(CommandLine cli) {
         VectorizationOptions options = new VectorizationOptions();
 
         if (cli.hasOption(WINDOW_SIZE)) {

@@ -21,7 +21,7 @@ public class AnalyzerOptionsReader {
     protected static String STOP_WORDS = "stop-words";
     protected static String GO_WORDS = "go-words";
 
-    public Options addOptions(Options options) {
+    public void addOptions(Options options) {
         Option option = new Option(null, PORTER_STEMMER_DEPTH, true, "");
         option.setRequired(false);
         options.addOption(option);
@@ -58,11 +58,9 @@ public class AnalyzerOptionsReader {
         option.setRequired(false);
         option.setArgs(Option.UNLIMITED_VALUES);
         options.addOption(option);
-
-        return options;
     }
 
-    public AnalyzerOptions getAnalyzerOptions(CommandLine cli) {
+    public AnalyzerOptions getOptions(CommandLine cli) {
         AnalyzerOptions options = new AnalyzerOptions();
 
         String[] filters = cli.getOptionValues(FILTERS);
