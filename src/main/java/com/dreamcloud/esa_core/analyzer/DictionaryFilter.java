@@ -12,24 +12,24 @@ import java.io.IOException;
  * the input tokens ensuring that all are valid words.
  */
 public class DictionaryFilter extends FilteringTokenFilter {
-    DictionaryRepository repository;
+    FilterWordRepository repository;
     Boolean ignoreCase;
     private final CharTermAttribute termAtt = this.addAttribute(CharTermAttribute.class);
 
-    public DictionaryFilter(TokenStream input, DictionaryRepository repository, Boolean ignoreCase) {
+    public DictionaryFilter(TokenStream input, FilterWordRepository repository, Boolean ignoreCase) {
         super(input);
         this.repository = repository;
         this.ignoreCase = ignoreCase;
     }
 
-    public DictionaryFilter(TokenStream input, DictionaryRepository repository) {
+    public DictionaryFilter(TokenStream input, FilterWordRepository repository) {
         super(input);
         this.repository = repository;
         this.ignoreCase = true;
     }
 
     protected boolean accept() throws IOException {
-        CharArraySet words = repository.getDictionaryWords();
+        CharArraySet words = repository.getWords();
         //Why is reading from a char array so damn hard?
         char[] buffer = this.termAtt.buffer();
         StringBuilder sb = new StringBuilder(termAtt.length());

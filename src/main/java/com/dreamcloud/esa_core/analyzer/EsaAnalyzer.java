@@ -58,16 +58,7 @@ public class EsaAnalyzer extends Analyzer {
 
         if (options.getStopWordsRepository() != null) {
             try {
-                result = new StopFilter(result, options.getStopWordsRepository().getStopWords());
-            } catch (IOException e) {
-                System.out.println("ESA warning: failed to load stop word dictionary; " + e.getMessage());
-                System.exit(1);
-            }
-        }
-
-        if (options.getRareWordsRepository() != null) {
-            try {
-                result = new StopFilter(result, options.getRareWordsRepository().getStopWords());
+                result = new StopFilter(result, options.getStopWordsRepository().getWords());
             } catch (IOException e) {
                 System.out.println("ESA warning: failed to load stop word dictionary; " + e.getMessage());
                 System.exit(1);

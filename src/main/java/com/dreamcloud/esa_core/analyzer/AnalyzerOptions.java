@@ -1,25 +1,34 @@
 package com.dreamcloud.esa_core.analyzer;
 
+import com.dreamcloud.esa_core.documentPreprocessor.DocumentPreprocessor;
+
 import java.util.Set;
 
 /**
- * Tokenization options for the Lucene analyzers.
+ * Analysis options for documents.
+ *
+ * These are mostly flags for various Lucene filters.
+ * You can of course use any analyzer that you want and don't need to rely on the analyzer or
+ * options provided here.
  */
 public class AnalyzerOptions {
-    public boolean porterStemmer = false;
-    public int porterStemmerDepth = 1;
-    public int minimumWordLength = 0;
-    public int maximumWordLength = 0;
-    public boolean lowerCase = false;
-    public boolean classic = false;
-    public boolean asciiFolding = false;
-    public boolean singularCase = false;
+    protected boolean porterStemmer = false;
+    protected int porterStemmerDepth = 1;
+    protected int minimumWordLength = 0;
+    protected int maximumWordLength = 0;
 
-    public StopWordRepository stopWordsRepository;
-    public StopWordRepository rareWordsRepository;
-    public DictionaryRepository dictionaryRepository;
-    public Set<String> stopTokenTypes;
-    public TokenizerFactory tokenizerFactory;
+    //filters
+    protected boolean lowerCase = false;
+    protected boolean classic = false;
+    protected boolean asciiFolding = false;
+    protected boolean singularCase = false;
+
+    protected DocumentPreprocessor preprocessor;
+
+    protected FilterWordRepository stopWordsRepository;
+    protected FilterWordRepository dictionaryRepository;
+    protected Set<String> stopTokenTypes;
+    protected TokenizerFactory tokenizerFactory;
 
     public AnalyzerOptions() {}
 
@@ -87,27 +96,19 @@ public class AnalyzerOptions {
         this.singularCase = singularCase;
     }
 
-    public StopWordRepository getStopWordsRepository() {
+    public FilterWordRepository getStopWordsRepository() {
         return stopWordsRepository;
     }
 
-    public void setStopWordsRepository(StopWordRepository stopWordsRepository) {
+    public void setStopWordsRepository(FilterWordRepository stopWordsRepository) {
         this.stopWordsRepository = stopWordsRepository;
     }
 
-    public StopWordRepository getRareWordsRepository() {
-        return rareWordsRepository;
-    }
-
-    public void setRareWordsRepository(StopWordRepository rareWordsRepository) {
-        this.rareWordsRepository = rareWordsRepository;
-    }
-
-    public DictionaryRepository getDictionaryRepository() {
+    public FilterWordRepository getDictionaryRepository() {
         return dictionaryRepository;
     }
 
-    public void setDictionaryRepository(DictionaryRepository dictionaryRepository) {
+    public void setFilterWordRepository(FilterWordRepository dictionaryRepository) {
         this.dictionaryRepository = dictionaryRepository;
     }
 
@@ -125,5 +126,13 @@ public class AnalyzerOptions {
 
     public void setTokenizerFactory(TokenizerFactory tokenizerFactory) {
         this.tokenizerFactory = tokenizerFactory;
+    }
+
+    public DocumentPreprocessor getPreprocessor() {
+        return preprocessor;
+    }
+
+    public void setPreprocessor(DocumentPreprocessor preprocessor) {
+        this.preprocessor = preprocessor;
     }
 }
