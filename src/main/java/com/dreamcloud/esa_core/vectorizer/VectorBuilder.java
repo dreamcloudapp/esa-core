@@ -60,7 +60,7 @@ public class VectorBuilder {
                         if (scoreIdx + vectorizationOptions.windowSize < termScores.size()) {
                             float headScore = (float) termScores.get(scoreIdx).getScore();
                             float tailScore = (float) termScores.get(scoreIdx + vectorizationOptions.windowSize).getScore();
-                            if (headScore - tailScore < headScore * vectorizationOptions.dropOff) {
+                            if (headScore - tailScore < headScore * vectorizationOptions.getWindowDrop()) {
                                 break;
                             }
                         }

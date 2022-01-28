@@ -22,51 +22,60 @@ public class EsaAnalyzer extends Analyzer {
     }
 
     protected TokenStreamComponents createComponents(String fieldName) {
-        Tokenizer source = options.tokenizerFactory.getTokenizer();
+        Tokenizer source = options.getTokenizerFactory().getTokenizer();
         TokenStream result = source;
 
-        if (options.stopTokenTypes != null) {
-            result = new TypeTokenFilter(source, options.stopTokenTypes);
+        if (options.getStopTokenTypes() != null) {
+            result = new TypeTokenFilter(source, options.getStopTokenTypes());
         }
-        if (options.asciiFoldingFilter) {
+        if (options.isUsingAsciiFolding()) {
             result = new ASCIIFoldingFilter(result, false);
         }
-        if (options.lowerCaseFilter) {
+        if (options.isUsingLowerCase()) {
             result = new LowerCaseFilter(result);
         }
-        if (options.classicFilter) {
+        if (options.isUsingClassic()) {
             result = new ClassicFilter(result);
         }
-        if (options.singularCaseFilter) {
+        if (options.isUsingSingularCase()) {
             result = new EnglishMinimalStemFilter(result);
         }
-        if (options.minimumWordLength > 0) {
-            result = new LengthFilter(result, options.minimumWordLength, 1000);
+
+        if (options.getMinimumWordLength() > 0 || options.getMaximumWordLength() > 0) {
+            int minimumWordLength = 0;
+            int maximumWordLength = 1024;
+            if (options.getMinimumWordLength() > 0) {
+                minimumWordLength = options.getMinimumWordLength();
+            }
+            if (options.getMaximumWordLength() > 0) {
+                maximumWordLength = options.getMaximumWordLength();
+            }
+            result = new LengthFilter(result, minimumWordLength, maximumWordLength);
         }
-        if (options.dictionaryRepository != null) {
-            result = new DictionaryFilter(result, options.dictionaryRepository);
+        if (options.getDictionaryRepository() != null) {
+            result = new DictionaryFilter(result, options.getDictionaryRepository());
         }
 
-        if (options.stopWordsRepository != null) {
+        if (options.getStopWordsRepository() != null) {
             try {
-                result = new StopFilter(result, options.stopWordsRepository.getStopWords());
+                result = new StopFilter(result, options.getStopWordsRepository().getStopWords());
             } catch (IOException e) {
                 System.out.println("ESA warning: failed to load stop word dictionary; " + e.getMessage());
                 System.exit(1);
             }
         }
 
-        if (options.rareWordsRepository != null) {
+        if (options.getRareWordsRepository() != null) {
             try {
-                result = new StopFilter(result, options.rareWordsRepository.getStopWords());
+                result = new StopFilter(result, options.getRareWordsRepository().getStopWords());
             } catch (IOException e) {
                 System.out.println("ESA warning: failed to load stop word dictionary; " + e.getMessage());
                 System.exit(1);
             }
         }
 
-        if (options.porterStemmerFilter) {
-            for(int i=0; i<options.porterStemmerFilterDepth; i++) {
+        if (options.isUsingPorterStemmer()) {
+            for(int i=0; i<options.getPorterStemmerDepth(); i++) {
                 result = new PorterStemFilter(result);
             }
         }
