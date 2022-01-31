@@ -4,7 +4,7 @@ import com.dreamcloud.esa_core.vectorizer.DocumentScoreVector;
 import com.dreamcloud.esa_core.vectorizer.TextVectorizer;
 
 public class DocumentSimilarity {
-    TextVectorizer vectorizer;
+    private TextVectorizer vectorizer;
 
     public DocumentSimilarity(TextVectorizer vectorizer) {
         this.vectorizer = vectorizer;

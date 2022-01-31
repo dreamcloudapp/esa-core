@@ -54,7 +54,7 @@ public class DocumentScoreVector {
             Integer[] commonDocumentIds = topCommonConcepts.keySet().toArray(Integer[]::new);
             Arrays.sort(commonDocumentIds, (Integer c1, Integer c2) -> Float.compare(topCommonConcepts.get(c2), topCommonConcepts.get(c1)));
             for (int conceptIdx = 0; conceptIdx < 10; conceptIdx++) {
-                similarityInfo.topConcepts.add(String.valueOf(commonDocumentIds[conceptIdx]));
+                similarityInfo.getTopConcepts().add(String.valueOf(commonDocumentIds[conceptIdx]));
             }
         }
         return similarityInfo;
