@@ -7,6 +7,8 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -60,7 +62,7 @@ public class AnalyzerOptionsReader {
         options.addOption(option);
     }
 
-    public AnalyzerOptions getOptions(CommandLine cli) {
+    public AnalyzerOptions getOptions(CommandLine cli) throws IOException {
         AnalyzerOptions options = new AnalyzerOptions();
 
         String[] filters = cli.getOptionValues(FILTERS);
@@ -120,7 +122,12 @@ public class AnalyzerOptionsReader {
         if (cli.hasOption(STOP_WORDS)) {
             FilterWordRepository repository = new FilterWordRepository(options.isUsingLowerCase());
             for (String sourceFileName: cli.getOptionValues(STOP_WORDS)) {
-                repository.addSource(sourceFileName);
+                if ("en-default".equals(sourceFileName)) {
+                    InputStream in = getClass().getResourceAsStream("/en-stopwords.txt");
+                    repository.addSource(in);
+                } else {
+                    repository.addSource(sourceFileName);
+                }
             }
             options.setStopWordsRepository(repository);
         }
@@ -128,7 +135,12 @@ public class AnalyzerOptionsReader {
         if (cli.hasOption(GO_WORDS)) {
             FilterWordRepository repository = new FilterWordRepository(options.isUsingLowerCase());
             for (String dictionaryFileName: cli.getOptionValues(GO_WORDS)) {
-                repository.addSource(dictionaryFileName);
+                if ("en-default".equals(dictionaryFileName)) {
+                    InputStream in = getClass().getResourceAsStream("/en-words.txt");
+                    repository.addSource(in);
+                } else {
+                    repository.addSource(dictionaryFileName);
+                }
             }
             options.setFilterWordRepository(repository);
         }

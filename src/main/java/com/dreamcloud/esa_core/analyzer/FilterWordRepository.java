@@ -12,6 +12,7 @@ public class FilterWordRepository {
     protected CharArraySet source;
     protected ArrayList<File> sourceFiles = new ArrayList<>();
     protected ArrayList<String> sourceFileNames = new ArrayList<>();
+    private ArrayList<InputStream> inputStreams = new ArrayList<>();
 
     public FilterWordRepository(boolean ignoreCase) {
         this.ignoreCase = ignoreCase;
@@ -21,6 +22,10 @@ public class FilterWordRepository {
     public void addSource(CharArraySet source) {
         this.source.addAll(source);
         this.readSources = false;
+    }
+
+    public void addSource(InputStream inputStream) {
+        this.inputStreams.add(inputStream);
     }
 
     public void addSource(File sourceFile) {
@@ -39,8 +44,12 @@ public class FilterWordRepository {
 
     public void loadSourceFile(File sourceFile) throws IOException {
         InputStream fileInputStream = new FileInputStream(sourceFile);
-        InputStreamReader inputStream = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);
-        BufferedReader reader = new BufferedReader(inputStream);
+        this.loadFromInputStream(fileInputStream);
+    }
+
+    private void loadFromInputStream(InputStream inputStream) throws IOException {
+        InputStreamReader streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+        BufferedReader reader = new BufferedReader(streamReader);
         String line = reader.readLine();
         while (line != null) {
             if (!"".equals(line)) {
@@ -53,6 +62,9 @@ public class FilterWordRepository {
 
     public CharArraySet getWords() throws IOException {
         if (!readSources) {
+            for (InputStream inputStream: inputStreams) {
+                this.loadFromInputStream(inputStream);
+            }
             for (File sourceFile: sourceFiles) {
                 this.loadSourceFile(sourceFile);
             }
