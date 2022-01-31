@@ -66,27 +66,18 @@ public class AnalyzerOptionsReader {
         String[] filters = cli.getOptionValues(FILTERS);
         if (filters != null) {
             for(String filter: filters) {
-                switch(filter) {
-                    case "stemmer":
-                        options.setUsingPorterStemmer(true);
-                        break;
-                    case "classic":
-                        options.setUsingClassic(true);
-                        break;
-                    case "lower":
-                        options.setUsingLowerCase(true);
-                        break;
-                    case "singular":
-                        options.setUsingSingularCase(true);
-                    case "ascii":
-                        options.setUsingAsciiFolding(true);
-                        break;
+                switch (filter) {
+                    case "stemmer" -> options.setUsingPorterStemmer(true);
+                    case "classic" -> options.setUsingClassic(true);
+                    case "lower" -> options.setUsingLowerCase(true);
+                    case "singular" -> options.setUsingSingularCase(true);
+                    case "ascii" -> options.setUsingAsciiFolding(true);
                 }
             }
         }
 
         boolean hasPosTags = cli.hasOption(POS_TAGS);
-        List<String> posTags = Arrays.asList(cli.getOptionValues(POS_TAGS));
+
         boolean hasStanfordPreprocessor = false;
 
         ArrayList<DocumentPreprocessor> preprocessors = new ArrayList<>();
@@ -95,7 +86,12 @@ public class AnalyzerOptionsReader {
                 switch (preprocessor) {
                     case "stanford-lemma" -> {
                         hasStanfordPreprocessor = true;
-                        preprocessors.add(new StanfordLemmaPreprocessor(posTags));
+                        if (hasPosTags) {
+                            List<String> posTags = Arrays.asList(cli.getOptionValues(POS_TAGS));
+                            preprocessors.add(new StanfordLemmaPreprocessor(posTags));
+                        } else {
+                            preprocessors.add(new StanfordLemmaPreprocessor());
+                        }
                     }
                     case "wiki" -> preprocessors.add(new WikiPreprocessor());
                     case "standard" -> preprocessors.add(new StandardPreprocessor());
