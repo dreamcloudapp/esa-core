@@ -106,15 +106,15 @@ public class AnalyzerOptionsReader {
 
         if (cli.hasOption(PORTER_STEMMER_DEPTH)) {
             options.setUsingPorterStemmer(true);
-            options.setPorterStemmerDepth(Integer.parseInt(PORTER_STEMMER_DEPTH));
+            options.setPorterStemmerDepth(Integer.parseInt(cli.getOptionValue(PORTER_STEMMER_DEPTH)));
         }
 
         if (cli.hasOption(MIN_WORD_LENGTH)) {
-            options.setMinimumWordLength(Integer.parseInt(MIN_WORD_LENGTH));
+            options.setMinimumWordLength(Integer.parseInt(cli.getOptionValue(MIN_WORD_LENGTH)));
         }
 
         if (cli.hasOption(MAX_WORD_LENGTH)) {
-            options.setMaximumWordLength(Integer.parseInt(MAX_WORD_LENGTH));
+            options.setMaximumWordLength(Integer.parseInt(cli.getOptionValue(MAX_WORD_LENGTH)));
         }
 
         if (cli.hasOption(STOP_WORDS)) {
