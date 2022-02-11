@@ -41,7 +41,7 @@ public class VectorizationOptionsReader {
         }
 
         if (cli.hasOption(WINDOW_DROP)) {
-            options.setWindowDrop(Integer.parseInt(cli.getOptionValue(WINDOW_DROP)));
+            options.setWindowDrop(Float.parseFloat(cli.getOptionValue(WINDOW_DROP)));
         }
 
         if (cli.hasOption(VECTOR_LIMIT)) {
