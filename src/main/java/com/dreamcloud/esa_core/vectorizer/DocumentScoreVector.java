@@ -7,7 +7,7 @@ import org.eclipse.collections.impl.factory.primitive.ObjectFloatMaps;
 import java.util.Arrays;
 
 public class DocumentScoreVector {
-    MutableObjectFloatMap<Integer> documentScores = ObjectFloatMaps.mutable.empty();
+    private MutableObjectFloatMap<Integer> documentScores = ObjectFloatMaps.mutable.empty();
 
     public DocumentScoreVector() {
 
@@ -53,15 +53,11 @@ public class DocumentScoreVector {
         if (gatherTopConcepts) {
             Integer[] commonDocumentIds = topCommonConcepts.keySet().toArray(Integer[]::new);
             Arrays.sort(commonDocumentIds, (Integer c1, Integer c2) -> Float.compare(topCommonConcepts.get(c2), topCommonConcepts.get(c1)));
-            for (int conceptIdx = 0; conceptIdx < 10; conceptIdx++) {
+            for (int conceptIdx = 0; conceptIdx < 10 && conceptIdx < commonDocumentIds.length; conceptIdx++) {
                 similarityInfo.getTopConcepts().add(String.valueOf(commonDocumentIds[conceptIdx]));
             }
         }
         return similarityInfo;
-    }
-
-    public Integer[] getSortedDocumentIds() {
-        return documentScores.keySet().toArray(new Integer[0]);
     }
 
     public void addScore(int document, float score) {
@@ -83,5 +79,13 @@ public class DocumentScoreVector {
 
     public float getScore(int documentId) {
         return documentScores.get(documentId);
+    }
+
+    public void setScore(int documentId, float score) {
+        this.documentScores.put(documentId, score);
+    }
+
+    public MutableObjectFloatMap<Integer> getDocumentScores() {
+        return documentScores;
     }
 }

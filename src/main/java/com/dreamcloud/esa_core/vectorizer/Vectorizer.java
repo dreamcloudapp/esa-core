@@ -1,9 +1,9 @@
 package com.dreamcloud.esa_core.vectorizer;
 
 public class Vectorizer implements TextVectorizer {
-    protected VectorBuilder builder;
+    protected DocumentScoreVectorBuilder builder;
 
-    public Vectorizer(VectorBuilder builder) {
+    public Vectorizer(DocumentScoreVectorBuilder builder) {
         this.builder = builder;
     }
 

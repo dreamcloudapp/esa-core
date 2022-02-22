@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class FilterWordRepository {
     boolean ignoreCase;
     boolean readSources = false;
-    protected CharArraySet source;
+    protected final CharArraySet source;
     protected ArrayList<File> sourceFiles = new ArrayList<>();
     protected ArrayList<String> sourceFileNames = new ArrayList<>();
     private ArrayList<InputStream> inputStreams = new ArrayList<>();
@@ -53,7 +53,9 @@ public class FilterWordRepository {
         String line = reader.readLine();
         while (line != null) {
             if (!"".equals(line)) {
-                source.add(line);
+                synchronized (source) {
+                    source.add(line);
+                }
             }
             line = reader.readLine();
         }

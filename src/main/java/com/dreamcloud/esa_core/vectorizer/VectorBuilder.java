@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class VectorBuilder {
+public class VectorBuilder implements DocumentScoreVectorBuilder {
     public static Map<String, DocumentScoreVector> cache = new ConcurrentHashMap<>();
     DocumentScoreReader scoreReader;
     TfIdfAnalyzer tfIdfAnalyzer;
@@ -82,14 +82,14 @@ public class VectorBuilder {
             }
 
             if (vectorizationOptions != null && vectorizationOptions.vectorLimit > 0) {
-                TfIdfScore[] sortedScores = new TfIdfScore[vector.documentScores.size()];
+                TfIdfScore[] sortedScores = new TfIdfScore[vector.getDocumentScores().size()];
                 int s = 0;
-                for (Integer documentId: vector.documentScores.keySet()) {
+                for (Integer documentId: vector.getDocumentScores().keySet()) {
                     sortedScores[s++] = new TfIdfScore(documentId, null, vector.getScore(documentId));
                 }
 
                 Arrays.sort(sortedScores, (t1, t2) -> Float.compare((float) t2.getScore(), (float) t1.getScore()));
-                vector.documentScores.clear();
+                vector.getDocumentScores().clear();
                 int cutOff = Math.min(vectorizationOptions.vectorLimit, sortedScores.length);
                 for (int t=0; t<cutOff; t++) {
                     vector.addScore(sortedScores[t].getDocument(), (float) sortedScores[t].getScore());
