@@ -1,15 +1,15 @@
 package com.dreamcloud.esa_core.vectorizer;
 
 import com.dreamcloud.esa_core.documentPreprocessor.DocumentPreprocessor;
+import com.dreamcloud.esa_core.vectorizer.scoreMod.ScoreMod;
+import com.dreamcloud.esa_core.vectorizer.scoreMod.ScoreModApplication;
+import com.dreamcloud.esa_core.vectorizer.scoreMod.ScoreModPosition;
 import com.dreamcloud.esa_score.analysis.CollectionInfo;
 import com.dreamcloud.esa_score.analysis.TfIdfAnalyzer;
 import com.dreamcloud.esa_score.score.DocumentScoreReader;
 import com.dreamcloud.esa_score.score.TfIdfScore;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class VectorBuilder implements DocumentScoreVectorBuilder {
@@ -19,6 +19,7 @@ public class VectorBuilder implements DocumentScoreVectorBuilder {
     VectorizationOptions vectorizationOptions;
     DocumentPreprocessor preprocessor;
     CollectionInfo collectionInfo;
+    private ArrayList<ScoreMod> scoreMods = new ArrayList<>();
 
     public VectorBuilder(DocumentScoreReader scoreReader, CollectionInfo collectionInfo, TfIdfAnalyzer analyzer, DocumentPreprocessor preprocessor, VectorizationOptions vectorizationOptions) {
         this.scoreReader = scoreReader;
@@ -30,6 +31,10 @@ public class VectorBuilder implements DocumentScoreVectorBuilder {
 
     public VectorBuilder(DocumentScoreReader scoreReader, CollectionInfo collectionInfo, TfIdfAnalyzer tfIdfAnalyzer, DocumentPreprocessor preprocessor) {
         this(scoreReader, collectionInfo, tfIdfAnalyzer, preprocessor, null);
+    }
+
+    public void addScoreMod(ScoreMod scoreMod) {
+        this.scoreMods.add(scoreMod);
     }
 
     public DocumentScoreVector build(String document) throws Exception {
@@ -48,29 +53,44 @@ public class VectorBuilder implements DocumentScoreVectorBuilder {
                 scoreMap.put(score.getTerm(), (float) score.getScore());
             }
 
-            //We need to prune these scores!
             Vector<TfIdfScore> scoreDocs = new Vector<>();
-            if (vectorizationOptions != null && vectorizationOptions.windowSize > 0) {
-                Vector<TfIdfScore> allTermScores = new Vector<>();
+
+            //Score Mods
+
+            //Pre-vectorization, term mods
+            ArrayList<ScoreMod> preTermMods = new ArrayList<>();
+            for (ScoreMod scoreMod: scoreMods) {
+                if (scoreMod.getPosition() == ScoreModPosition.PRE_VECTORIZATION && scoreMod.getApplication() == ScoreModApplication.TERM) {
+                    preTermMods.add(scoreMod);
+                }
+            }
+            if (!preTermMods.isEmpty()) {
                 for (String term: terms) {
                     Vector<TfIdfScore> termScores = new Vector<>();
                     scoreReader.getTfIdfScores(term, termScores);
-                    for (int scoreIdx = 0; scoreIdx < termScores.size(); scoreIdx++) {
-                        allTermScores.add(termScores.get(scoreIdx));
-                        if (scoreIdx + vectorizationOptions.windowSize < termScores.size()) {
-                            float headScore = (float) termScores.get(scoreIdx).getScore();
-                            float tailScore = (float) termScores.get(scoreIdx + vectorizationOptions.windowSize).getScore();
-                            if (headScore - tailScore < headScore * vectorizationOptions.getWindowDrop()) {
-                                break;
-                            }
-                        }
+                    for (ScoreMod scoreMod: preTermMods) {
+                        termScores = scoreMod.applyMod(termScores);
                     }
+                    scoreDocs.addAll(termScores);
                 }
-                scoreDocs = allTermScores;
             } else {
                 scoreReader.getTfIdfScores(terms, scoreDocs);
             }
 
+            //Pre-vectorization, document mods
+            ArrayList<ScoreMod> preDocMods = new ArrayList<>();
+            for (ScoreMod scoreMod: scoreMods) {
+                if (scoreMod.getPosition() == ScoreModPosition.PRE_VECTORIZATION && scoreMod.getApplication() == ScoreModApplication.DOCUMENT) {
+                    preDocMods.add(scoreMod);
+                }
+            }
+            if (!preDocMods.isEmpty()) {
+                for (ScoreMod scoreMod: preTermMods) {
+                    scoreDocs = scoreMod.applyMod(scoreDocs);
+                }
+            }
+
+            //Vectorize and apply weights
             for (TfIdfScore docScore: scoreDocs) {
                 double weight = scoreMap.get(docScore.getTerm());
                 docScore.normalizeScore(weight);
@@ -81,18 +101,25 @@ public class VectorBuilder implements DocumentScoreVectorBuilder {
                 }
             }
 
-            if (vectorizationOptions != null && vectorizationOptions.vectorLimit > 0) {
-                TfIdfScore[] sortedScores = new TfIdfScore[vector.getDocumentScores().size()];
-                int s = 0;
-                for (Integer documentId: vector.getDocumentScores().keySet()) {
-                    sortedScores[s++] = new TfIdfScore(documentId, null, vector.getScore(documentId));
+            //Post-vectorization, document mod (no such thing as post/term mod)
+            ArrayList<ScoreMod> postDocMods = new ArrayList<>();
+            for (ScoreMod scoreMod: scoreMods) {
+                if (scoreMod.getPosition() == ScoreModPosition.POST_VECTORIZATION && scoreMod.getApplication() == ScoreModApplication.DOCUMENT) {
+                    postDocMods.add(scoreMod);
                 }
-
-                Arrays.sort(sortedScores, (t1, t2) -> Float.compare((float) t2.getScore(), (float) t1.getScore()));
+            }
+            if (!postDocMods.isEmpty()) {
+                Vector<TfIdfScore> tfIdfScoreVector = new Vector<>();
+                for (Integer documentId: vector.getDocumentScores().keySet()) {
+                    tfIdfScoreVector.add(new TfIdfScore(documentId, null, vector.getScore(documentId)));
+                    tfIdfScoreVector.sort((t1, t2) -> Float.compare((float) t2.getScore(), (float) t1.getScore()));
+                }
+                for (ScoreMod scoreMod: postDocMods) {
+                    tfIdfScoreVector = scoreMod.applyMod(tfIdfScoreVector);
+                }
                 vector.getDocumentScores().clear();
-                int cutOff = Math.min(vectorizationOptions.vectorLimit, sortedScores.length);
-                for (int t=0; t<cutOff; t++) {
-                    vector.addScore(sortedScores[t].getDocument(), (float) sortedScores[t].getScore());
+                for (TfIdfScore tfIdfScore: tfIdfScoreVector) {
+                    vector.addScore(tfIdfScore.getDocument(), (float) tfIdfScore.getScore());
                 }
             }
 
