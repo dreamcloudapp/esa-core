@@ -19,7 +19,7 @@ public class VectorBuilder implements DocumentScoreVectorBuilder {
     VectorizationOptions vectorizationOptions;
     DocumentPreprocessor preprocessor;
     CollectionInfo collectionInfo;
-    private ArrayList<ScoreMod> scoreMods = new ArrayList<>();
+    private final ArrayList<ScoreMod> scoreMods = new ArrayList<>();
 
     public VectorBuilder(DocumentScoreReader scoreReader, CollectionInfo collectionInfo, TfIdfAnalyzer analyzer, DocumentPreprocessor preprocessor, VectorizationOptions vectorizationOptions) {
         this.scoreReader = scoreReader;
@@ -92,6 +92,7 @@ public class VectorBuilder implements DocumentScoreVectorBuilder {
 
             //Vectorize and apply weights
             for (TfIdfScore docScore: scoreDocs) {
+                //How to move this normalization from this class to outside?
                 double weight = scoreMap.get(docScore.getTerm());
                 docScore.normalizeScore(weight);
                 if (vectorizationOptions != null) {
@@ -112,7 +113,6 @@ public class VectorBuilder implements DocumentScoreVectorBuilder {
                 Vector<TfIdfScore> tfIdfScoreVector = new Vector<>();
                 for (Integer documentId: vector.getDocumentScores().keySet()) {
                     tfIdfScoreVector.add(new TfIdfScore(documentId, null, vector.getScore(documentId)));
-                    tfIdfScoreVector.sort((t1, t2) -> Float.compare((float) t2.getScore(), (float) t1.getScore()));
                 }
                 for (ScoreMod scoreMod: postDocMods) {
                     tfIdfScoreVector = scoreMod.applyMod(tfIdfScoreVector);

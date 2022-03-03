@@ -9,7 +9,7 @@ abstract public class ScoreMod {
     private final ScoreModApplication application;
 
     public ScoreMod(ScoreModPosition position, ScoreModApplication application) {
-        if (position == ScoreModPosition.PRE_VECTORIZATION && application == ScoreModApplication.TERM) {
+        if (position == ScoreModPosition.POST_VECTORIZATION && application == ScoreModApplication.TERM) {
             throw new IllegalArgumentException("Mods that apply to terms must be pre-vectorization.");
         }
 
