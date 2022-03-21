@@ -69,11 +69,11 @@ public class AnalyzerOptionsReader {
         if (filters != null) {
             for(String filter: filters) {
                 switch (filter) {
-                    case "stemmer" -> options.setUsingPorterStemmer(true);
-                    case "classic" -> options.setUsingClassic(true);
-                    case "lower" -> options.setUsingLowerCase(true);
-                    case "singular" -> options.setUsingSingularCase(true);
-                    case "ascii" -> options.setUsingAsciiFolding(true);
+                    case "stemmer":  options.setUsingPorterStemmer(true); break;
+                    case "classic": options.setUsingClassic(true); break;
+                    case "lower": options.setUsingLowerCase(true); break;
+                    case "singular": options.setUsingSingularCase(true); break;
+                    case "ascii": options.setUsingAsciiFolding(true); break;
                 }
             }
         }
@@ -86,7 +86,7 @@ public class AnalyzerOptionsReader {
         if (cli.hasOption(PREPROCESSORS)) {
             for (String preprocessor: cli.getOptionValues(PREPROCESSORS)) {
                 switch (preprocessor) {
-                    case "stanford-lemma" -> {
+                    case "stanford-lemma":
                         hasStanfordPreprocessor = true;
                         if (hasPosTags) {
                             List<String> posTags = Arrays.asList(cli.getOptionValues(POS_TAGS));
@@ -94,10 +94,10 @@ public class AnalyzerOptionsReader {
                         } else {
                             preprocessors.add(new StanfordLemmaPreprocessor());
                         }
-                    }
-                    case "wiki" -> preprocessors.add(new WikiPreprocessor());
-                    case "standard" -> preprocessors.add(new StandardPreprocessor());
-                    default -> throw new IllegalArgumentException("Invalid document preprocessor '" + preprocessor + "'");
+                    break;
+                    case "wiki": preprocessors.add(new WikiPreprocessor()); break;
+                    case "standard": preprocessors.add(new StandardPreprocessor()); break;
+                    default: throw new IllegalArgumentException("Invalid document preprocessor '" + preprocessor + "'");
                 }
             }
         }
